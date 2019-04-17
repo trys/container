@@ -2,18 +2,19 @@
   (function() {
     var frame = window.frameElement;
     var query = frame.dataset.containerQuery;
-  
+
     function send(matches) {
       window.parent.postMessage(
         JSON.stringify({ c_query: true, matches, id: frame.id })
       );
     }
-  
-    window.matchMedia(query).addListener(function(event) {
+
+    var query = window.matchMedia(query);
+
+    query.addListener(function(event) {
       send(event.matches);
     });
-  
-    send(window.matchMedia(query).matches);
+
+    send(query.matches);
   })();
-  </script>
-  
+</script>
