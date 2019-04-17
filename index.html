@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Container</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      /* Required styling */
+      [data-container-query] {
+        position: relative;
+      }
+
+      iframe[data-container-query] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: none;
+        visibility: hidden;
+        opacity: 0;
+      }
+
+      /* Local styling */
+      header {
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.1);
+        height: 20vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px dashed rgba(0, 0, 0, 0.2);
+        font-family: -apple-system, sans-serif;
+        text-align: center;
+      }
+
+      header + header {
+        width: 75vw;
+      }
+
+      header + header + header {
+        width: 50vw;
+      }
+
+      header:after {
+        content: 'Container query: ' attr(data-container-query);
+      }
+
+      /* Query styling */
+      header[data-matches] {
+        background: slateblue;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header data-container-query="(min-width: 700px)"></header>
+    <header data-container-query="(min-width: 700px)"></header>
+    <header
+      data-container-query="(max-height: 250px) and (max-width: 700px)"
+    ></header>
+
+    <script>
+      (function containerQueries() {
+        var groups = [];
+        let containerCount = 0;
+
+        [].forEach.call(
+          document.querySelectorAll('[data-container-query]'),
+          function(el) {
+            var id = '_container_' + containerCount++;
+            var iframe = document.createElement('iframe');
+
+            iframe.dataset.containerQuery = el.dataset.containerQuery;
+            iframe.id = id;
+            iframe.src = '/container/';
+
+            el.appendChild(iframe);
+            groups.push({ id, el });
+          }
+        );
+
+        window.addEventListener(
+          'message',
+          function handleEvent(e) {
+            try {
+              var data = JSON.parse(e.data);
+              if (data.c_query) {
+                var group = groups.find(function(x) {
+                  return x.id === data.id;
+                });
+                if (!group) return;
+                group.el[data.matches ? 'setAttribute' : 'removeAttribute'](
+                  'data-matches',
+                  1
+                );
+              }
+            } catch (e) {}
+          },
+          false
+        );
+      })();
+    </script>
+  </body>
+</html>
